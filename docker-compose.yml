@@ -25,6 +25,11 @@ services:
       - "15672:15672"
     networks:
       - app_network
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      retries: 5
+      timeout: 5s
 
   product:
     build:
@@ -37,6 +42,7 @@ services:
       - "9301:9301"
     depends_on:
       - postgres
+      - rabbitmq
     networks:
       - app_network
 
@@ -51,6 +57,7 @@ services:
       - "9302:9302"
     depends_on:
       - postgres
+      - rabbitmq
     networks:
       - app_network
 
@@ -60,11 +67,12 @@ services:
       dockerfile: Dockerfile.user
     container_name: user_service
     environment:
-      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/user_service
+      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/user
     ports:
       - "9303:9303"
     depends_on:
       - postgres
+      - rabbitmq
     networks:
       - app_network
 
@@ -75,6 +83,8 @@ services:
     container_name: notification_service
     ports:
       - "9304:9304"
+    depends_on:
+      - rabbitmq
     networks:
       - app_network
 
