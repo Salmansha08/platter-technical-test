@@ -1,0 +1,17 @@
+{
+  "name": "platter-technical-test",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "nodemon app.js",
+    "start": "node app.js"
+  },
+  "author": "Salman Wiharja",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "pg-promise": "^11.9.1"
+  }
+}
