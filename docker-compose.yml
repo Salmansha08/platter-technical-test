@@ -1,0 +1,86 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres_container
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - app_network
+    command: postgres -c 'max_connections=200'
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq_container
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - app_network
+
+  product:
+    build:
+      context: .
+      dockerfile: Dockerfile.product
+    container_name: product_service
+    environment:
+      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/product
+    ports:
+      - "9301:9301"
+    depends_on:
+      - postgres
+    networks:
+      - app_network
+
+  payment:
+    build:
+      context: .
+      dockerfile: Dockerfile.payment
+    container_name: payment_service
+    environment:
+      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/payment
+    ports:
+      - "9302:9302"
+    depends_on:
+      - postgres
+    networks:
+      - app_network
+
+  user:
+    build:
+      context: .
+      dockerfile: Dockerfile.user
+    container_name: user_service
+    environment:
+      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/user_service
+    ports:
+      - "9303:9303"
+    depends_on:
+      - postgres
+    networks:
+      - app_network
+
+  notification:
+    build:
+      context: .
+      dockerfile: Dockerfile.notification
+    container_name: notification_service
+    ports:
+      - "9304:9304"
+    networks:
+      - app_network
+
+volumes:
+  postgres_data:
+
+networks:
+  app_network:
+    driver: bridge
