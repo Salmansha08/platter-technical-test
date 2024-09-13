@@ -1,0 +1,7 @@
+FROM node:20
+WORKDIR /app
+COPY ./services/notification.service.js /app/
+COPY ./package*.json /app/
+RUN npm install
+EXPOSE 9304
+CMD ["node", "notification.service.js"]
